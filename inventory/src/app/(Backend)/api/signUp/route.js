@@ -1,16 +1,15 @@
-// app/api/store-data/route.js
-
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
-const dataSchema = new Schema({
+const user = new Schema({
   name: String,
-  description: String,
-  price: Number,
+  email: String,
+  password: String,
+  confirmPassword: String,
 });
 
-const DataModel = mongoose.models.Data || mongoose.model("Data", dataSchema);
+const UserModel = mongoose.models.User || mongoose.model("User", user);
 
 const connectMongoDB = async () => {
   try {
@@ -20,9 +19,12 @@ const connectMongoDB = async () => {
     }
 
     const mongoURI = process.env.MONGODB_URI;
-    await mongoose.connect(mongoURI, {
+    console.log("Attempting to connect to MongoDB...");
+
+    mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      dbName: "user_login",
     });
     console.log("MongoDB connected successfully");
   } catch (error) {
@@ -34,16 +36,23 @@ const connectMongoDB = async () => {
 export async function POST(request) {
   try {
     await connectMongoDB();
-    const { name, description, price } = await request.json();
+    const { name, email, password, confirmPassword } = await request.json();
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return NextResponse.json(
+        { error: "Passwords do not match" },
+        { status: 400 }
+      );
+    }
 
     // Create a new document and save it to the DB
-    const newData = new DataModel({ name, description, price });
-    console.log(newData);
-    await newData.save();
+    const newUser = new UserModel({ name, email, password, confirmPassword });
+    await newUser.save();
 
-    return NextResponse.json({ message: "Data stored successfully" });
+    return NextResponse.json({ message: "User stored successfully" });
   } catch (error) {
-    console.error("Error storing data:", error);
+    console.error("Error storing User:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

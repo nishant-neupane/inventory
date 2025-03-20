@@ -7,7 +7,7 @@ const Hero = () => {
   useEffect(() => {
     const connectToMongoDB = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/connect");
+        const response = await fetch("http://localhost:3000/api/connect");
         console.log("Response Status:", response.status);
 
         if (response.ok) {
