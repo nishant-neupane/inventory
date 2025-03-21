@@ -9,11 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "mongodb": "^6.14.2",
     "mongoose": "^8.12.1",
     "next": "15.2.1",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sonner": "^2.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

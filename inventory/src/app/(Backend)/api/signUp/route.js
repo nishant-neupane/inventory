@@ -1,34 +1,26 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
-const user = new Schema({
+const userSchema = new Schema({
   name: String,
-  email: String,
+  email: { type: String, unique: true },
   password: String,
-  confirmPassword: String,
 });
 
-const UserModel = mongoose.models.User || mongoose.model("User", user);
+const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
 
 const connectMongoDB = async () => {
   try {
-    if (mongoose.connections[0].readyState) {
-      console.log("Already connected to MongoDB");
-      return;
-    }
-
-    const mongoURI = process.env.MONGODB_URI;
-    console.log("Attempting to connect to MongoDB...");
-
-    mongoose.connect(mongoURI, {
+    if (mongoose.connection.readyState) return;
+    await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      dbName: "user_login",
+      dbName: "Inventory",
     });
-    console.log("MongoDB connected successfully");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    console.error("MongoDB connection failed:", error);
     throw new Error("MongoDB connection failed");
   }
 };
@@ -38,21 +30,22 @@ export async function POST(request) {
     await connectMongoDB();
     const { name, email, password, confirmPassword } = await request.json();
 
-    // Check if passwords match
     if (password !== confirmPassword) {
-      return NextResponse.json(
-        { error: "Passwords do not match" },
-        { status: 400 }
-      );
+      console.error("Passwords do not match");
+      return NextResponse.json({}, { status: 400 });
+    }
+    if (await UserModel.findOne({ email })) {
+      console.error("Email is already registered");
+      return NextResponse.json({}, { status: 400 });
     }
 
-    // Create a new document and save it to the DB
-    const newUser = new UserModel({ name, email, password, confirmPassword });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new UserModel({ name, email, password: hashedPassword });
     await newUser.save();
-
-    return NextResponse.json({ message: "User stored successfully" });
+    // return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.json({}, { status: 201 });
   } catch (error) {
-    console.error("Error storing User:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Error storing user:", error);
+    return NextResponse.json({}, { status: 500 });
   }
 }
