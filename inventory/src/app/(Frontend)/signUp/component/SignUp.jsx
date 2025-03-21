@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import {useAuthCheck} from "../../../hooks/useAuthCheck.js";
 import { toast } from "sonner";
 import GoogleSignIn from "./google";
 import { useRouter } from "next/navigation";
 const SignUp = () => {
+  useAuthCheck();
   const router = useRouter();
 
   const [formData, setFormData] = useState({

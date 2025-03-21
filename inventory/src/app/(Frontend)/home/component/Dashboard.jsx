@@ -1,39 +1,32 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { use } from "react";
+import { useProtectRoute } from "../../../hooks/useProtectRoute.js";
 
-const Hero = () => {
-  const [status, setStatus] = useState(null);
+import { useRouter } from "next/navigation";
 
-  useEffect(() => {
-    const connectToMongoDB = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/connect");
-        console.log("Response Status:", response.status);
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Response Data:", data);
-          setStatus(data.message || "Error occurred");
-        } else {
-          const errorData = await response.text();
-          console.error("Error response:", errorData);
-          setStatus("Failed to connect to MongoDB");
-        }
-      } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-        setStatus("Failed to connect to MongoDB");
-      }
-    };
-
-    connectToMongoDB();
-  }, []);
+const Dashboard = () => {
+  const router = useRouter();
+  useProtectRoute();
+  const logout = () => {
+    localStorage.removeItem("user");
+    router.push("/login");
+  };
 
   return (
-    <div>
-      <h1>MongoDB Connection Status</h1>
-      <p>{status ? status : "Connecting to MongoDB..."}</p>
+    <div className="flex flex-col justify-center items-center">
+      <div>Dashboard</div>
+      <div>
+        <button
+          onClick={() => {
+            logout();
+          }}
+          className="px-4 py-2 bg-red-500 text-white cursor-pointer rounded-md"
+        >
+          logout
+        </button>
+      </div>
     </div>
   );
 };
 
-export default Hero;
+export default Dashboard;

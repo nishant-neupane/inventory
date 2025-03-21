@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 const connectMongoDB = async () => {
@@ -8,11 +7,13 @@ const connectMongoDB = async () => {
       return;
     }
 
-    const mongoURI =
-      process.env.MONGODB_URI;
-    await mongoose.connect(mongoURI, {
+    const mongoURI = process.env.MONGODB_URI;
+    console.log("Attempting to connect to MongoDB...");
+
+    mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      dbName: "Inventory",
     });
     console.log("MongoDB connected successfully");
   } catch (error) {
@@ -21,11 +22,4 @@ const connectMongoDB = async () => {
   }
 };
 
-export async function GET() {
-  try {
-    await connectMongoDB();
-    return NextResponse.json({ message: "MongoDB connected successfully" });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
+export default connectMongoDB;
